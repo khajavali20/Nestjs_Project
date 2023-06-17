@@ -1,15 +1,13 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ProductModel } from 'databases/products.schema';
 import { CreateProductDTO } from './dtos/product.dto';
 import { UpdateProductDTO } from './dtos/update-product.dto';
-import Stripe from 'stripe';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel('Product') private readonly productModel: ProductModel,
-    @Inject('STRIPE_CLIENT') private readonly stripeClient: Stripe,
   ) {}
 
   async addProduct(data: CreateProductDTO) {
@@ -54,20 +52,5 @@ export class ProductsService {
       throw new BadRequestException('Unable to delete the product');
     }
     return { status: true };
-  }
-
-  async createStripePayment(
-    amount: number,
-    currency: string,
-    paymentMethod: string,
-  ) {
-    const paymentIntent = await this.stripeClient.paymentIntents.create({
-      amount,
-      currency,
-      payment_method_types: ['card'],
-      payment_method: paymentMethod,
-    });
-
-    return paymentIntent;
   }
 }
